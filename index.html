@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doctor Bandini</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --accent: #06b6d4;
+      --danger: #dc2626;
+      --shadow: 0 20px 50px rgba(37, 99, 235, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #eef6ff 0%, var(--bg) 48%, #ffffff 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(255,255,255,0.86);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .header-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: 0;
+      color: var(--primary-dark);
+    }
+
+    .logo {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      box-shadow: 0 12px 28px rgba(37, 99, 235, 0.25);
+    }
+
+    main {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(320px, 680px);
+      justify-content: center;
+      align-items: start;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .subtle {
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .recorder {
+      border: 1px solid #dbeafe;
+      background: #f8fbff;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .wave {
+      height: 128px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      margin-bottom: 18px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      color: #94a3b8;
+      font-weight: 700;
+    }
+
+    canvas { width: 100%; height: 128px; display: block; }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    .round {
+      width: 64px;
+      height: 64px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      box-shadow: 0 16px 30px rgba(15,23,42,0.18);
+    }
+
+    .record { background: var(--danger); }
+    .pause { background: #f59e0b; }
+    .finish { background: #ea580c; }
+    .discard { background: #0f172a; }
+
+    .timer {
+      margin-top: 14px;
+      font: 800 28px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: var(--primary-dark);
+    }
+
+    .status {
+      min-height: 22px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .generate {
+      width: 100%;
+      margin-top: 18px;
+      padding: 14px 18px;
+      background: linear-gradient(90deg, var(--primary), #4f46e5);
+      color: white;
+      box-shadow: 0 16px 30px rgba(37,99,235,0.22);
+    }
+
+    .result {
+      display: none;
+      max-width: 680px;
+      margin: 24px auto 0;
+    }
+
+    .result.show { display: block; }
+
+    .section {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 12px;
+      background: #fff;
+    }
+
+    .section-title {
+      color: var(--primary-dark);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 900;
+      margin-bottom: 7px;
+    }
+
+    .section p {
+      margin: 0;
+      color: #334155;
+      line-height: 1.55;
+      white-space: pre-line;
+    }
+
+    .copy {
+      padding: 10px 14px;
+      color: var(--primary-dark);
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+    }
+
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+      main { padding: 24px 14px 56px; }
+      .card { padding: 18px; }
+      .recorder { padding: 16px; }
+      .controls { gap: 10px; }
+      .round {
+        width: 56px;
+        height: 56px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <div class="logo">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M11 2v2"></path><path d="M5 2v2"></path><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"></path><path d="M8 15a6 6 0 0 0 12 0v-3"></path><circle cx="20" cy="10" r="2"></circle>
+          </svg>
+        </div>
+        <span>Doctor Buddy</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="grid">
+      <div class="card">
+        <div class="recorder">
+          <div class="wave">
+            <canvas id="waveform" width="700" height="128"></canvas>
+          </div>
+
+          <div class="controls">
+            <button id="startBtn" class="round record" title="Start recording">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Z"></path><path d="M17.3 11a5.3 5.3 0 0 1-10.6 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-1.7Z"></path></svg>
+            </button>
+            <button id="pauseBtn" class="round pause" title="Pause or resume" disabled>II</button>
+            <button id="finishBtn" class="round finish" title="Finish and process" disabled>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1"></rect></svg>
+            </button>
+            <button id="discardBtn" class="round discard" title="Discard recording" disabled>
+              <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+            </button>
+          </div>
+
+          <div id="timer" class="timer">00:00</div>
+          <div id="status" class="status">Ready to record</div>
+        </div>
+
+        <button id="generateBtn" class="generate" disabled>Generate Case Sheet</button>
+      </div>
+    </section>
+
+    <section id="result" class="card result">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <h2>Generated Case Sheet</h2>
+        <button id="copyBtn" class="copy">Copy Case Sheet</button>
+      </div>
+      <div id="caseSheet"></div>
+    </section>
+  </main>
+
+  <script>
+    const fields = [
+      ["Chief Complaint", "NIL"],
+      ["History of Present Illness", "NIL"],
+      ["Past Medical History", "NIL"],
+      ["Family History", "NIL"],
+      ["Personal History", "NIL"],
+      ["Developmental History", "NIL"],
+      ["Vaccination History", "NIL"],
+      ["General Examination", "NIL"],
+      ["Mental Status Examination", "NIL"],
+      ["Systemic Examination", "NIL"],
+      ["Provisional Diagnosis", "NIL"],
+      ["Treatment Plan", "- Medicines as advised\\n- Review if symptoms worsen\\n- Investigations as clinically indicated"]
+    ];
+
+    const startBtn = document.getElementById("startBtn");
+    const pauseBtn = document.getElementById("pauseBtn");
+    const finishBtn = document.getElementById("finishBtn");
+    const discardBtn = document.getElementById("discardBtn");
+    const generateBtn = document.getElementById("generateBtn");
+    const timer = document.getElementById("timer");
+    const statusText = document.getElementById("status");
+    const canvas = document.getElementById("waveform");
+    const ctx = canvas.getContext("2d");
+
+    let mediaRecorder, stream, chunks = [], seconds = 0, interval, audioBlob, analyser, animationId, paused = false;
+
+    function formatTime(value) {
+      const m = String(Math.floor(value / 60)).padStart(2, "0");
+      const s = String(value % 60).padStart(2, "0");
+      return `${m}:${s}`;
+    }
+
+    function drawIdle() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = "#cbd5e1";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height / 2);
+      ctx.lineTo(canvas.width, canvas.height / 2);
+      ctx.stroke();
+    }
+
+    function drawWave() {
+      if (!analyser) return;
+      const data = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteTimeDomainData(data);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+      gradient.addColorStop(0, "#2563eb");
+      gradient.addColorStop(0.5, "#06b6d4");
+      gradient.addColorStop(1, "#4f46e5");
+      ctx.strokeStyle = paused ? "#94a3b8" : gradient;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      const slice = canvas.width / data.length;
+      let x = 0;
+      data.forEach((v, i) => {
+        const y = (v / 128) * (canvas.height / 2);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        x += slice;
+      });
+      ctx.stroke();
+      animationId = requestAnimationFrame(drawWave);
+    }
+
+    async function startRecording() {
+      try {
+        audioBlob = null;
+        chunks = [];
+        seconds = 0;
+        paused = false;
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = event => {
+          if (event.data.size > 0) chunks.push(event.data);
+        };
+        mediaRecorder.onstop = () => {
+          audioBlob = new Blob(chunks, { type: "audio/webm" });
+          generateBtn.disabled = false;
+          statusText.textContent = "Recording captured. Generate case sheet when ready.";
+          stream.getTracks().forEach(track => track.stop());
+          clearInterval(interval);
+          cancelAnimationFrame(animationId);
+          drawIdle();
+        };
+        mediaRecorder.start();
+        const audioContext = new AudioContext();
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 2048;
+        audioContext.createMediaStreamSource(stream).connect(analyser);
+        drawWave();
+        interval = setInterval(() => {
+          seconds += 1;
+          timer.textContent = formatTime(seconds);
+        }, 1000);
+        startBtn.disabled = true;
+        pauseBtn.disabled = false;
+        finishBtn.disabled = false;
+        discardBtn.disabled = false;
+        generateBtn.disabled = true;
+        statusText.textContent = "Recording in progress...";
+      } catch (error) {
+        statusText.textContent = "Microphone access denied. Please allow microphone permission.";
+      }
+    }
+
+    function pauseRecording() {
+      if (!mediaRecorder) return;
+      if (mediaRecorder.state === "recording") {
+        mediaRecorder.pause();
+        paused = true;
+        pauseBtn.textContent = ">";
+        statusText.textContent = "Recording paused";
+      } else if (mediaRecorder.state === "paused") {
+        mediaRecorder.resume();
+        paused = false;
+        pauseBtn.textContent = "II";
+        statusText.textContent = "Recording in progress...";
+      }
+    }
+
+    function finishRecording() {
+      if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+      finishBtn.disabled = true;
+      discardBtn.disabled = false;
+    }
+
+    function discardRecording() {
+      if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
+      audioBlob = null;
+      seconds = 0;
+      timer.textContent = "00:00";
+      statusText.textContent = "Recording discarded. Ready to record again.";
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+      finishBtn.disabled = true;
+      discardBtn.disabled = true;
+      generateBtn.disabled = true;
+      document.getElementById("result").classList.remove("show");
+      drawIdle();
+    }
+
+    function renderResult() {
+      statusText.textContent = "Case sheet generated.";
+      const sheet = document.getElementById("caseSheet");
+      sheet.innerHTML = "";
+      fields.forEach(([title, body]) => {
+        const section = document.createElement("div");
+        section.className = "section";
+        section.innerHTML = `<div class="section-title">${title}</div><p>${body}</p>`;
+        sheet.appendChild(section);
+      });
+      document.getElementById("result").classList.add("show");
+      document.getElementById("result").scrollIntoView({ behavior: "smooth" });
+    }
+
+    function copyCaseSheet() {
+      const text = fields.map(([title, body]) => `${title}\\n${body}`).join("\\n\\n");
+      navigator.clipboard.writeText(text);
+      const btn = document.getElementById("copyBtn");
+      btn.textContent = "Copied";
+      setTimeout(() => btn.textContent = "Copy Case Sheet", 1600);
+    }
+
+    startBtn.addEventListener("click", startRecording);
+    pauseBtn.addEventListener("click", pauseRecording);
+    finishBtn.addEventListener("click", finishRecording);
+    discardBtn.addEventListener("click", discardRecording);
+    generateBtn.addEventListener("click", renderResult);
+    document.getElementById("copyBtn").addEventListener("click", copyCaseSheet);
+    drawIdle();
+  </script>
+</body>
+</html>
