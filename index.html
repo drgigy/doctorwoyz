@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Doctor's Woyz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <title>Doctor WOYZ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -40,9 +41,11 @@
     body {
       margin: 0;
       min-height: 100vh;
+      min-height: 100dvh;
       font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: var(--bg);
       color: var(--text);
+      -webkit-tap-highlight-color: transparent;
     }
 
     button {
@@ -51,6 +54,7 @@
 
     .app {
       min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
     }
@@ -437,6 +441,59 @@
       outline: none;
     }
 
+    .key-control {
+      position: relative;
+    }
+
+    .key-control input {
+      padding-right: 44px;
+    }
+
+    .key-visibility {
+      position: absolute;
+      top: 50%;
+      right: 5px;
+      width: 34px;
+      height: 34px;
+      transform: translateY(-50%);
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 7px;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .settings-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .settings-actions .save-key {
+      margin-top: 0;
+    }
+
+    .remove-key {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: #b42318;
+      background: var(--panel);
+      padding: 11px 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .key-status {
+      min-height: 18px;
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
     .api-field select {
       width: 100%;
       min-width: 0;
@@ -678,9 +735,9 @@
 
     @media (max-width: 720px) {
       .topbar-inner {
-        min-height: 64px;
+        min-height: 60px;
         justify-content: flex-start;
-        padding: 10px 14px;
+        padding: 8px max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left));
       }
 
       .brand {
@@ -689,14 +746,14 @@
       }
 
       .brand-mark {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        font-size: 24px;
+        width: 38px;
+        height: 38px;
+        border-radius: 9px;
+        font-size: 23px;
       }
 
       .brand-title {
-        font-size: clamp(19px, 6vw, 23px);
+        font-size: 20px;
         white-space: nowrap;
       }
 
@@ -708,7 +765,7 @@
       }
 
       main {
-        padding: 18px 12px 18px;
+        padding: 16px 12px calc(82px + env(safe-area-inset-bottom));
       }
 
       .intro {
@@ -722,17 +779,38 @@
       }
 
       .focus-box {
-        min-height: 158px;
+        min-height: 148px;
+        margin-bottom: 18px;
+        padding: 18px;
       }
 
       .round {
-        width: 58px;
-        height: 58px;
+        width: 56px;
+        height: 56px;
       }
 
       .round.record {
         width: 70px;
         height: 70px;
+      }
+
+      .controls {
+        gap: 10px;
+        min-height: 68px;
+      }
+
+      .extend-button {
+        min-height: 46px;
+        padding-inline: 11px;
+      }
+
+      .timer {
+        font-size: 26px;
+      }
+
+      .status {
+        margin-top: 10px;
+        font-size: 13px;
       }
 
       .result-header {
@@ -765,16 +843,34 @@
 
       .section {
         padding: 14px;
+        border-radius: 8px;
       }
 
       .settings {
-        left: 16px;
-        bottom: 16px;
+        left: max(12px, env(safe-area-inset-left));
+        bottom: max(12px, env(safe-area-inset-bottom));
       }
 
       .settings-panel {
-        bottom: 46px;
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        bottom: calc(58px + env(safe-area-inset-bottom));
+        width: auto;
+        max-height: min(620px, calc(100dvh - 90px));
+        overflow-y: auto;
+        border-radius: 8px;
       }
+    }
+
+    @media (max-width: 390px) {
+      .brand-title { font-size: 18px; }
+      .new-button { font-size: 0; padding: 10px; }
+      .new-button svg { width: 19px; height: 19px; }
+      .card { padding: 16px 12px; }
+      .round { width: 52px; height: 52px; }
+      .extend-button { order: 4; width: min(100%, 180px); }
+      .section textarea { font-size: 16px; }
     }
   </style>
 </head>
@@ -786,7 +882,7 @@
           <span class="brand-mark" aria-hidden="true">
             W
           </span>
-          <span class="brand-title">Doctor's Woyz</span>
+          <span class="brand-title">Doctor WOYZ</span>
         </button>
         <button class="new-button" id="newButton" type="button">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>
@@ -902,8 +998,13 @@
           <button class="switch" id="darkSwitch" type="button" aria-label="Toggle dark mode"><span></span></button>
         </div>
         <div class="api-field">
-          <label for="geminiKey">Key</label>
-          <input id="geminiKey" type="password" autocomplete="off" placeholder="Paste key here">
+          <label for="geminiKey">API Key</label>
+          <div class="key-control">
+            <input id="geminiKey" type="password" autocomplete="off" spellcheck="false" placeholder="Paste key here">
+            <button class="key-visibility" id="keyVisibilityButton" type="button" title="Show API key" aria-label="Show API key">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
         </div>
         <div class="api-field">
           <label for="aiModel">AI Model</label>
@@ -913,8 +1014,11 @@
             <option value="gemini-2.5-pro" selected>Detailed</option>
           </select>
         </div>
-        <button class="save-key" id="saveKeyButton" type="button">Save</button>
-        <p style="margin:10px 0 0; padding:10px; border-radius:10px; background:#fffbeb; color:#92400e; font-size:11px; line-height:1.45;">Demo mode only. Use a backend before publishing.</p>
+        <div class="settings-actions">
+          <button class="save-key" id="saveKeyButton" type="button">Save</button>
+          <button class="remove-key" id="removeKeyButton" type="button">Remove Key</button>
+        </div>
+        <p class="key-status" id="keyStatus"></p>
       </div>
       <button class="settings-button" id="settingsButton" type="button" title="Settings">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.52a2 2 0 0 1-1 1.72l-.15.1a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.52a2 2 0 0 1 1-1.72l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
@@ -925,7 +1029,6 @@
   <script>
     window.OPD_SCRIBE_CONFIG = {
       processAudioEndpoint: "",
-      apiKey: "",
       model: "gemini-2.5-pro",
       fallbackModels: ["gemini-2.5-flash", "gemini-2.5-flash-lite"]
     };
@@ -934,6 +1037,8 @@
       mediaRecorder: null,
       stream: null,
       chunks: [],
+      pendingBlob: null,
+      transcribeOnStop: false,
       startedAt: 0,
       elapsed: 0,
       maxRecordingSeconds: 300,
@@ -990,7 +1095,7 @@
       timer.textContent = formatTime(remainingTime());
       if (state.elapsed >= state.maxRecordingSeconds) {
         status.textContent = `${formatTime(state.maxRecordingSeconds)} limit reached. Generating note...`;
-        stopRecording();
+        stopRecording(true);
       }
     }
 
@@ -1005,12 +1110,12 @@
     function setRecordingControls() {
       controls.innerHTML = `
         <button class="round pause" id="pauseButton" type="button" title="Pause Recording">${icon("pause")}</button>
-        <button class="round stop" id="stopButton" type="button" title="Finish and Process">${icon("stop")}</button>
+        <button class="round stop" id="stopButton" type="button" title="Stop Recording">${icon("stop")}</button>
         <button class="extend-button" id="extendButton" type="button">Extend 1 min</button>
         <button class="round discard" id="discardButton" type="button" title="Discard and Restart">${icon("restart")}</button>
       `;
       document.getElementById("pauseButton").addEventListener("click", togglePause);
-      document.getElementById("stopButton").addEventListener("click", stopRecording);
+      document.getElementById("stopButton").addEventListener("click", () => stopRecording(false));
       document.getElementById("extendButton").addEventListener("click", extendRecording);
       document.getElementById("discardButton").addEventListener("click", resetScribe);
     }
@@ -1020,12 +1125,34 @@
       document.getElementById("recordButton").addEventListener("click", startRecording);
     }
 
-    async function startRecording() {
-      try {
+    async function getMicrophoneStream() {
+      const reusableStream = state.stream && state.stream.getAudioTracks().some(track => track.readyState === "live");
+      if (!reusableStream) {
         state.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        state.stream.getAudioTracks().forEach(track => {
+          track.addEventListener("ended", () => {
+            state.stream = null;
+          }, { once: true });
+        });
+      }
+      state.stream.getAudioTracks().forEach(track => {
+        track.enabled = true;
+      });
+      return state.stream;
+    }
+
+    async function startRecording() {
+      if (state.pendingBlob) {
+        status.textContent = "Press Enter to transcribe the completed recording.";
+        return;
+      }
+      try {
+        const microphoneStream = await getMicrophoneStream();
         state.chunks = [];
+        state.transcribeOnStop = false;
+        state.paused = false;
         state.maxRecordingSeconds = DEFAULT_RECORDING_SECONDS;
-        state.mediaRecorder = new MediaRecorder(state.stream);
+        state.mediaRecorder = new MediaRecorder(microphoneStream);
         state.mediaRecorder.ondataavailable = event => {
           if (event.data.size > 0) state.chunks.push(event.data);
         };
@@ -1037,7 +1164,7 @@
         status.textContent = "Recording in progress...";
         focusBox.classList.add("recording");
         setRecordingControls();
-        await startVisualization(state.stream);
+        await startVisualization(microphoneStream);
       } catch (error) {
         status.textContent = "Microphone access denied. Please enable microphone permissions.";
       }
@@ -1072,8 +1199,9 @@
       }
     }
 
-    function stopRecording() {
+    function stopRecording(transcribeImmediately = false) {
       if (state.mediaRecorder && state.mediaRecorder.state !== "inactive") {
+        state.transcribeOnStop = transcribeImmediately;
         state.mediaRecorder.stop();
       }
     }
@@ -1082,9 +1210,29 @@
       clearInterval(state.timerId);
       cancelAnimationFrame(state.animationId);
       if (state.audioContext) state.audioContext.close();
-      if (state.stream) state.stream.getTracks().forEach(track => track.stop());
+      if (state.stream) {
+        state.stream.getAudioTracks().forEach(track => {
+          track.enabled = false;
+        });
+      }
       const blob = new Blob(state.chunks, { type: "audio/webm" });
       if (!blob.size) return;
+      state.pendingBlob = blob;
+      state.mediaRecorder = null;
+      state.paused = false;
+      focusBox.classList.remove("recording");
+      setIdleControls();
+      if (state.transcribeOnStop) {
+        await transcribePendingRecording();
+      } else {
+        status.textContent = "Recording stopped. Press Enter to transcribe.";
+      }
+    }
+
+    async function transcribePendingRecording() {
+      if (!state.pendingBlob) return;
+      const blob = state.pendingBlob;
+      state.pendingBlob = null;
       await processAudio(blob);
     }
 
@@ -1195,7 +1343,6 @@ Return exactly these keys:
       if (!apiKey) {
         throw new Error("Paste your key in Settings before processing.");
       }
-      localStorage.setItem("opd_demo_gemini_key", apiKey);
       const audioBase64 = await blobToBase64(blob);
       const mimeType = blob.type || "audio/webm";
       const errors = [];
@@ -1214,25 +1361,10 @@ Return exactly these keys:
 
     async function processAudio(blob) {
       setView("processing");
-      const endpoint = window.OPD_SCRIBE_CONFIG.processAudioEndpoint;
       try {
-        if (endpoint) {
-          const response = await fetch(endpoint, {
-            method: "POST",
-            headers: {
-              "Content-Type": blob.type || "audio/webm",
-              "X-Strict-Dictation": String(state.strict)
-            },
-            body: blob
-          });
-          if (!response.ok) throw new Error("Processing failed");
-          const data = await response.json();
-          fillReport(data);
-        } else {
-          const { report } = await processWithGeminiInBrowser(blob);
-          fillReport(report);
-          document.getElementById("resultMessage").textContent = "";
-        }
+        const { report } = await processWithGeminiInBrowser(blob);
+        fillReport(report);
+        document.getElementById("resultMessage").textContent = "";
       } catch (error) {
         fillReport({});
         document.getElementById("resultMessage").textContent = error.message;
@@ -1261,10 +1393,16 @@ Return exactly these keys:
       }
       clearInterval(state.timerId);
       cancelAnimationFrame(state.animationId);
-      if (state.stream) state.stream.getTracks().forEach(track => track.stop());
+      if (state.audioContext) state.audioContext.close();
+      if (state.stream) {
+        state.stream.getAudioTracks().forEach(track => {
+          track.enabled = false;
+        });
+      }
       state.mediaRecorder = null;
-      state.stream = null;
       state.chunks = [];
+      state.pendingBlob = null;
+      state.transcribeOnStop = false;
       state.elapsed = 0;
       state.maxRecordingSeconds = DEFAULT_RECORDING_SECONDS;
       state.paused = false;
@@ -1274,6 +1412,10 @@ Return exactly these keys:
       setIdleControls();
       setView("record");
     }
+
+    window.addEventListener("beforeunload", () => {
+      if (state.stream) state.stream.getTracks().forEach(track => track.stop());
+    });
 
     document.getElementById("strictToggle").addEventListener("click", () => {
       state.strict = !state.strict;
@@ -1291,6 +1433,37 @@ Return exactly these keys:
       state.dark = !state.dark;
       document.body.classList.toggle("dark", state.dark);
       event.currentTarget.classList.toggle("on", state.dark);
+    });
+
+    document.addEventListener("keydown", async event => {
+      if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
+      const target = event.target;
+      const isEditing = target instanceof HTMLElement && (
+        target.isContentEditable ||
+        ["INPUT", "TEXTAREA", "SELECT", "BUTTON"].includes(target.tagName)
+      );
+      if (isEditing) return;
+
+      if (event.code === "Space") {
+        event.preventDefault();
+        if (processingView.classList.contains("visible") || resultView.classList.contains("visible")) return;
+        if (state.mediaRecorder && state.mediaRecorder.state !== "inactive") {
+          togglePause();
+        } else {
+          await startRecording();
+        }
+      }
+
+      if (event.key === "Enter") {
+        if (processingView.classList.contains("visible") || resultView.classList.contains("visible")) return;
+        if (state.mediaRecorder && state.mediaRecorder.state !== "inactive") {
+          event.preventDefault();
+          stopRecording(true);
+        } else if (state.pendingBlob) {
+          event.preventDefault();
+          await transcribePendingRecording();
+        }
+      }
     });
 
     const caseFields = [
@@ -1327,18 +1500,37 @@ Return exactly these keys:
 
     document.getElementById("brandButton").addEventListener("click", resetScribe);
     document.getElementById("newButton").addEventListener("click", resetScribe);
-    document.getElementById("geminiKey").value = localStorage.getItem("opd_demo_gemini_key") || "";
-    document.getElementById("geminiKey").addEventListener("input", event => {
-      localStorage.setItem("opd_demo_gemini_key", event.target.value.trim());
-    });
+    const keyInput = document.getElementById("geminiKey");
+    const keyStatus = document.getElementById("keyStatus");
+    const savedKey = localStorage.getItem("doctor_woyz_api_key") || "";
+    keyInput.value = savedKey;
+    keyStatus.textContent = savedKey ? "An API key is saved in this browser." : "No API key is saved.";
     document.getElementById("aiModel").value = localStorage.getItem("opd_demo_ai_model_v2") || window.OPD_SCRIBE_CONFIG.model;
     document.querySelectorAll(".section textarea").forEach(textarea => {
       textarea.addEventListener("input", () => resizeTextarea(textarea));
     });
     document.getElementById("saveKeyButton").addEventListener("click", () => {
-      localStorage.setItem("opd_demo_gemini_key", document.getElementById("geminiKey").value.trim());
+      const key = keyInput.value.trim();
+      if (!key) {
+        keyStatus.textContent = "Enter an API key before saving.";
+        return;
+      }
+      localStorage.setItem("doctor_woyz_api_key", key);
       localStorage.setItem("opd_demo_ai_model_v2", document.getElementById("aiModel").value);
+      keyStatus.textContent = "API key saved in this browser.";
       document.getElementById("settings").classList.remove("open");
+    });
+    document.getElementById("removeKeyButton").addEventListener("click", () => {
+      localStorage.removeItem("doctor_woyz_api_key");
+      keyInput.value = "";
+      keyInput.type = "password";
+      keyStatus.textContent = "API key removed from this browser.";
+    });
+    document.getElementById("keyVisibilityButton").addEventListener("click", event => {
+      const reveal = keyInput.type === "password";
+      keyInput.type = reveal ? "text" : "password";
+      event.currentTarget.title = reveal ? "Hide API key" : "Show API key";
+      event.currentTarget.setAttribute("aria-label", event.currentTarget.title);
     });
     setIdleControls();
     resizeAllTextareas();
