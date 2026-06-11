@@ -1,38 +1,132 @@
-# Doctor WOYZ - GitHub Pages Edition
+# Doctor WOYZ - GitHub Pages + Firestore
 
-This folder contains the static, browser-only version of Doctor WOYZ.
+This edition uses:
 
-## Upload To GitHub
+- GitHub Pages for the website
+- Firebase Anonymous Authentication for device identity
+- Firebase Email/Password Authentication for the administrator
+- Cloud Firestore for centralized device approval
+- A browser-local Gemini API key entered by each user
 
-1. Create a new GitHub repository.
-2. Upload `index.html` and `.nojekyll` to the repository root.
-3. Open the repository's **Settings**.
-4. Select **Pages**.
-5. Under **Build and deployment**, choose **Deploy from a branch**.
-6. Select the `main` branch and `/ (root)`.
-7. Select **Save**.
-8. Wait for GitHub to provide the website address.
+## Upload These Files To GitHub
 
-## Using The Website
+Upload these files to the repository root:
 
-1. Open the deployed website.
-2. Open **Settings** using the gear button.
-3. Paste a Google AI Studio API key.
-4. Choose the AI model.
+```text
+index.html
+main.html
+admin.html
+.nojekyll
+README.md
+firestore.rules
+```
+
+`firestore.rules` is not used directly by GitHub Pages. Copy its contents into
+the Firebase Console as explained below.
+
+## Firebase Setup
+
+### 1. Create Firestore
+
+1. Open Firebase Console and select `Doctor WOYZ`.
+2. Open **Build > Firestore Database**.
+3. Select **Create database**.
+4. Choose **Standard edition / Native mode**.
+5. Select **Start in production mode**.
+6. Select a nearby database location.
+7. Select **Enable**.
+
+Do not manually create the `devices` collection. It is created when the first
+browser requests approval.
+
+### 2. Enable Authentication
+
+1. Open **Build > Authentication**.
+2. Select **Get started**.
+3. Open **Sign-in method**.
+4. Enable **Anonymous**.
+5. Enable **Email/Password**.
+
+### 3. Create The Administrator
+
+1. Open **Authentication > Users**.
+2. Select **Add user**.
+3. Use this exact email:
+
+```text
+gigy@woyz.in
+```
+
+4. Choose a strong password.
+
+The password is not stored in these GitHub files.
+
+### 4. Publish Firestore Rules
+
+1. Open **Firestore Database > Rules**.
+2. Replace the existing rules with the contents of `firestore.rules`.
+3. Select **Publish**.
+
+These rules allow anonymous users to create and read only their own device
+request. Only `gigy@woyz.in` can list and modify all devices.
+
+### 5. Add The GitHub Domain
+
+After GitHub Pages provides the website URL:
+
+1. Open **Authentication > Settings**.
+2. Open **Authorized domains**.
+3. Select **Add domain**.
+4. Add the domain portion of the GitHub Pages address, for example:
+
+```text
+USERNAME.github.io
+```
+
+Do not include `https://`, a slash, or the repository name.
+
+## Enable GitHub Pages
+
+1. Open the GitHub repository.
+2. Open **Settings > Pages**.
+3. Under **Build and deployment**, choose **Deploy from a branch**.
+4. Select `main` and `/ (root)`.
 5. Select **Save**.
 
-The key is stored only in that browser's local storage. It is not included in
-the HTML or GitHub repository.
+The main site will be:
 
-Use **Remove Key** before handing the device to someone else or when the key is
-no longer needed.
+```text
+https://USERNAME.github.io/REPOSITORY/
+```
 
-## Limitations
+The admin page will be:
 
-- Anyone with access to the same browser profile may be able to retrieve the
-  locally saved key.
-- A shared API key can be used outside Doctor WOYZ.
-- Clearing browser data removes the saved key.
-- This static version cannot securely enforce device approval.
-- This version is intended for closed-group demonstrations, not production use
-  with identifiable patient information.
+```text
+https://USERNAME.github.io/REPOSITORY/admin.html
+```
+
+## Approval Workflow
+
+1. A user opens the main website.
+2. The browser signs in anonymously to Firebase.
+3. The user enters the doctor's name and device name.
+4. A Firestore document is created with status `pending`.
+5. The administrator opens `admin.html`.
+6. Sign in as `gigy@woyz.in`.
+7. Select **Approve** beside the device.
+8. The user's page unlocks automatically.
+9. The user opens Settings and saves their Gemini API key in that browser.
+
+The administrator can later select **Block**. The user will be blocked the next
+time the page receives the updated Firestore status.
+
+## Important Security Notes
+
+- Firebase's web `apiKey` in these HTML files identifies the Firebase project;
+  it is not the Gemini API key and is expected to be present in browser code.
+- Firestore security depends on the published security rules.
+- Each user's Gemini API key remains in that browser's local storage and can be
+  retrieved by someone with access to that browser profile.
+- The Gemini key is sent directly from the browser to Gemini.
+- This architecture is suitable for closed testing, not production use with
+  identifiable patient information.
