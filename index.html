@@ -785,9 +785,13 @@
     }
 
     .section textarea {
+      display: block;
       width: 100%;
       min-height: 56px;
-      overflow: hidden;
+      height: auto;
+      max-height: none;
+      overflow-x: hidden;
+      overflow-y: hidden;
       border: 0;
       border-radius: 6px;
       padding: 2px;
@@ -1213,7 +1217,7 @@
     const timer = document.getElementById("timer");
     const status = document.getElementById("status");
     const DEFAULT_RECORDING_SECONDS = 300;
-    const EXTEND_SECONDS = 60;
+    const EXTEND_SECONDS = 300;
     function showApprovedApp() {
       const approvalGate = document.getElementById("approvalGate");
       const app = document.getElementById("app");
@@ -1299,6 +1303,7 @@
       processingView.classList.toggle("visible", view === "processing");
       resultView.classList.toggle("visible", view === "result");
       document.getElementById("newButton").classList.toggle("visible", view === "result");
+      if (view === "result") scheduleTextareaResize();
     }
 
     function updateTimer() {
@@ -1322,7 +1327,7 @@
       controls.innerHTML = `
         <button class="round pause" id="pauseButton" type="button" title="Pause Recording">${icon("pause")}</button>
         <button class="round stop" id="stopButton" type="button" title="Stop Recording">${icon("stop")}</button>
-        <button class="extend-button" id="extendButton" type="button">Extend 1 min</button>
+        <button class="extend-button" id="extendButton" type="button">Extend 5 min</button>
         <button class="round discard" id="discardButton" type="button" title="Discard and Restart">${icon("restart")}</button>
       `;
       document.getElementById("pauseButton").addEventListener("click", togglePause);
@@ -1469,12 +1474,20 @@
     }
 
     function resizeTextarea(textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = `${Math.max(56, textarea.scrollHeight)}px`;
+      if (!textarea.offsetParent) return;
+      textarea.style.height = "0px";
+      textarea.style.height = `${Math.max(56, textarea.scrollHeight + 2)}px`;
     }
 
     function resizeAllTextareas() {
       document.querySelectorAll(".section textarea").forEach(resizeTextarea);
+    }
+
+    function scheduleTextareaResize() {
+      requestAnimationFrame(() => {
+        resizeAllTextareas();
+        requestAnimationFrame(resizeAllTextareas);
+      });
     }
 
     function buildPrompt() {
@@ -1691,7 +1704,6 @@ Return exactly these keys:
       document.getElementById("systemicExamination").value = data.systemicExamination || "NIL";
       document.getElementById("provisionalDiagnosis").value = data.provisionalDiagnosis || "Generated provisional diagnosis will appear here.";
       document.getElementById("treatmentPlan").value = data.treatmentPlan || "Generated treatment plan will appear here.";
-      resizeAllTextareas();
     }
 
     function resetScribe() {
@@ -1845,6 +1857,7 @@ Return exactly these keys:
     document.querySelectorAll(".section textarea").forEach(textarea => {
       textarea.addEventListener("input", () => resizeTextarea(textarea));
     });
+    window.addEventListener("resize", scheduleTextareaResize);
     document.getElementById("saveKeyButton").addEventListener("click", () => {
       const key = keyInput.value.trim();
       if (!key) {
@@ -1869,7 +1882,7 @@ Return exactly these keys:
       event.currentTarget.setAttribute("aria-label", event.currentTarget.title);
     });
     setIdleControls();
-    resizeAllTextareas();
+    scheduleTextareaResize();
     initializeDeviceApproval();
   </script>
 </body>
