@@ -19,6 +19,12 @@ admin.html
 .nojekyll
 README.md
 firestore.rules
+manifest.webmanifest
+sw.js
+offline.html
+icon-192.png
+icon-512.png
+icon-maskable-512.png
 ```
 
 `firestore.rules` is not used directly by GitHub Pages. Copy its contents into
@@ -104,6 +110,32 @@ The admin page will be:
 ```text
 https://USERNAME.github.io/REPOSITORY/admin.html
 ```
+
+## PWA And TWA Setup
+
+The repository includes the Web App Manifest, service worker, offline fallback,
+and install icons required by PWABuilder.
+
+After uploading the latest files:
+
+1. Wait for GitHub Pages to finish publishing.
+2. Open `https://drgigy.github.io/doctorwoyz/manifest.webmanifest` and confirm
+   that JSON appears.
+3. Open `https://drgigy.github.io/doctorwoyz/sw.js` and confirm that the service
+   worker file appears.
+4. Return to PWABuilder and analyze:
+
+```text
+https://drgigy.github.io/doctorwoyz/
+```
+
+5. Refresh the PWABuilder report.
+6. Package the Android app after the manifest and service-worker checks pass.
+
+For a fullscreen Trusted Web Activity, PWABuilder will later provide an Android
+application package name and SHA-256 signing fingerprint. Use those values to
+create `.well-known/assetlinks.json` in the website repository. The exact file
+cannot be completed before the Android package and signing key exist.
 
 ## Approval Workflow
 

@@ -4,7 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Neurology OPD voice scribe for structured, editable clinical case sheets.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Doctor WOYZ">
   <title>Doctor WOYZ</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -366,6 +374,22 @@
       justify-content: center;
       gap: 12px;
       min-height: 72px;
+    }
+
+    .control-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .control-label {
+      display: none;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      line-height: 1.2;
+      white-space: nowrap;
     }
 
     .round {
@@ -790,8 +814,9 @@
       min-height: 56px;
       height: auto;
       max-height: none;
+      field-sizing: content;
       overflow-x: hidden;
-      overflow-y: hidden;
+      overflow-y: hidden !important;
       border: 0;
       border-radius: 6px;
       padding: 2px;
@@ -917,6 +942,10 @@
         min-height: 68px;
       }
 
+      .control-label {
+        display: block;
+      }
+
       .extend-button {
         min-height: 46px;
         padding-inline: 11px;
@@ -988,7 +1017,8 @@
       .new-button svg { width: 19px; height: 19px; }
       .card { padding: 16px 12px; }
       .round { width: 52px; height: 52px; }
-      .extend-button { order: 4; width: min(100%, 180px); }
+      .control-item.extend-control { order: 4; width: min(100%, 180px); }
+      .extend-button { width: 100%; }
       .section textarea { font-size: 16px; }
     }
   </style>
@@ -1043,9 +1073,12 @@
             </div>
           </div>
           <div class="controls" id="controls">
-            <button class="round record" id="recordButton" type="button" title="Start Recording">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>
-            </button>
+            <span class="control-item">
+              <button class="round record" id="recordButton" type="button" title="Start Recording" aria-label="Start Recording">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>
+              </button>
+              <span class="control-label">Start recording</span>
+            </span>
           </div>
           <div class="status" id="status">Tap microphone to start dictation</div>
         </div>
@@ -1325,19 +1358,35 @@
 
     function setRecordingControls() {
       controls.innerHTML = `
-        <button class="round pause" id="pauseButton" type="button" title="Pause Recording">${icon("pause")}</button>
-        <button class="round stop" id="stopButton" type="button" title="Stop Recording">${icon("stop")}</button>
-        <button class="extend-button" id="extendButton" type="button">Extend 5 min</button>
-        <button class="round discard" id="discardButton" type="button" title="Discard and Restart">${icon("restart")}</button>
+        <span class="control-item">
+          <button class="round pause" id="pauseButton" type="button" title="Pause Recording" aria-label="Pause Recording">${icon("pause")}</button>
+          <span class="control-label" id="pauseLabel">Pause</span>
+        </span>
+        <span class="control-item">
+          <button class="round stop" id="stopButton" type="button" title="Stop and Transcribe" aria-label="Stop and Transcribe">${icon("stop")}</button>
+          <span class="control-label">Stop &amp; transcribe</span>
+        </span>
+        <span class="control-item extend-control">
+          <button class="extend-button" id="extendButton" type="button">Extend 5 min</button>
+        </span>
+        <span class="control-item">
+          <button class="round discard" id="discardButton" type="button" title="Refresh and Restart" aria-label="Refresh and Restart">${icon("restart")}</button>
+          <span class="control-label">Refresh</span>
+        </span>
       `;
       document.getElementById("pauseButton").addEventListener("click", togglePause);
-      document.getElementById("stopButton").addEventListener("click", () => stopRecording(false));
+      document.getElementById("stopButton").addEventListener("click", () => stopRecording(true));
       document.getElementById("extendButton").addEventListener("click", extendRecording);
       document.getElementById("discardButton").addEventListener("click", resetScribe);
     }
 
     function setIdleControls() {
-      controls.innerHTML = `<button class="round record" id="recordButton" type="button" title="Start Recording">${icon("mic")}</button>`;
+      controls.innerHTML = `
+        <span class="control-item">
+          <button class="round record" id="recordButton" type="button" title="Start Recording" aria-label="Start Recording">${icon("mic")}</button>
+          <span class="control-label">Start recording</span>
+        </span>
+      `;
       document.getElementById("recordButton").addEventListener("click", startRecording);
     }
 
@@ -1402,6 +1451,9 @@
         state.timerId = setInterval(updateTimer, 1000);
         status.textContent = "Recording in progress...";
         pauseButton.innerHTML = icon("pause");
+        pauseButton.title = "Pause Recording";
+        pauseButton.setAttribute("aria-label", "Pause Recording");
+        document.getElementById("pauseLabel").textContent = "Pause";
         state.paused = false;
         focusBox.classList.add("recording");
       } else {
@@ -1410,6 +1462,9 @@
         cancelAnimationFrame(state.animationId);
         status.textContent = "Recording paused";
         pauseButton.innerHTML = icon("play");
+        pauseButton.title = "Resume Recording";
+        pauseButton.setAttribute("aria-label", "Resume Recording");
+        document.getElementById("pauseLabel").textContent = "Resume";
         state.paused = true;
         focusBox.classList.remove("recording");
       }
@@ -1475,8 +1530,9 @@
 
     function resizeTextarea(textarea) {
       if (!textarea.offsetParent) return;
-      textarea.style.height = "0px";
+      textarea.style.height = "1px";
       textarea.style.height = `${Math.max(56, textarea.scrollHeight + 2)}px`;
+      textarea.style.overflowY = "hidden";
     }
 
     function resizeAllTextareas() {
@@ -1756,6 +1812,8 @@ Return exactly these keys:
     });
 
     document.addEventListener("keydown", async event => {
+      const desktopKeyboardEnabled = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+      if (!desktopKeyboardEnabled) return;
       if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
       const target = event.target;
       const isEditing = target instanceof HTMLElement && (
@@ -1884,6 +1942,13 @@ Return exactly these keys:
     setIdleControls();
     scheduleTextareaResize();
     initializeDeviceApproval();
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(error => {
+          console.warn("Service worker registration failed:", error);
+        });
+      });
+    }
   </script>
 </body>
 </html>
