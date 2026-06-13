@@ -1140,13 +1140,13 @@
             <h3>6. Personal History</h3>
             <textarea id="personalHistory">Awaiting generated personal history.</textarea>
           </div>
-          <div class="section">
-            <h3>7. General Examination</h3>
-            <textarea id="generalExamination">NIL</textarea>
+          <div class="section full">
+            <h3>7. Examination Findings</h3>
+            <textarea id="examinationFindings">NIL</textarea>
           </div>
-          <div class="section">
-            <h3>8. Systemic Examination</h3>
-            <textarea id="systemicExamination">NIL</textarea>
+          <div class="section full">
+            <h3>8. Current Medication</h3>
+            <textarea id="currentMedication">NIL</textarea>
           </div>
           <div class="section full diagnosis">
             <h3>9. Provisional Diagnosis</h3>
@@ -1179,7 +1179,6 @@
         <div class="api-field">
           <label for="aiModel">AI Model</label>
           <select id="aiModel">
-            <option value="gemini-2.5-flash-lite">Fast</option>
             <option value="gemini-2.5-flash">Balanced</option>
             <option value="gemini-2.5-pro" selected>Detailed</option>
           </select>
@@ -1220,7 +1219,7 @@
     window.OPD_SCRIBE_CONFIG = {
       processAudioEndpoint: "",
       model: "gemini-2.5-pro",
-      fallbackModels: ["gemini-2.5-flash", "gemini-2.5-flash-lite"]
+      fallbackModels: ["gemini-2.5-flash"]
     };
 
     const state = {
@@ -1548,129 +1547,64 @@
 
     function buildPrompt() {
       return `
-You are an expert neurology OPD medical scribe.
-The conversation may contain Malayalam, English, or Manglish.
-Convert colloquial Malayalam and Kerala Manglish medical expressions into standard professional clinical English.
+You are a neurology OPD medical scribe. Convert the Malayalam, English, or
+Kerala Manglish conversation into concise professional clinical English.
 
 Rules:
 - Output valid JSON only. No markdown.
-- Use professional neurological terminology.
-- Preserve symptom chronology, onset, duration, progression, improvement, medications, investigations, diagnoses, examination findings, and treatment advice.
-- Preserve clinically important negatives.
-- Do not omit clinically relevant information.
+- Preserve chronology, onset, duration, progression, relevant negatives,
+  medicines with dose/frequency/duration, investigations, examination,
+  diagnoses, and treatment advice exactly as expressed.
+- Separate patient statements, prior diagnoses, possibilities discussed,
+  examination findings, and the doctor's final assessment.
+- Never invent, assume, or complete missing facts. Do not infer a diagnosis,
+  medicine, examination finding, or negative finding from context.
+- Fill "provisionalDiagnosis" only when the doctor explicitly dictates a
+  provisional diagnosis. Never derive it from symptoms, history, examination,
+  investigations, differential discussion, or the patient's statements.
+- Fill "treatmentPlan" only when the doctor explicitly dictates the treatment
+  plan, advice, prescription, investigation, referral, or follow-up plan as
+  their final plan. Do not create or recommend a plan from the conversation.
+- Put medicines the patient is already taking in "currentMedication".
+  Put newly prescribed medicines only in "treatmentPlan".
+- If the doctor does not explicitly dictate either field, return "NIL" for
+  that field, even when a likely diagnosis or treatment seems obvious.
 - If a section is not mentioned, write "NIL".
-- Do not invent facts.
-- Distinguish the patient's symptoms from questions, possibilities, previous diagnoses, and the doctor's final assessment.
-- Use the glossary contextually. Do not insert a glossary term unless it was actually expressed in the conversation.
+- Apply glossary terms only when the corresponding expression was spoken.
 - Strict dictation mode: ${state.strict ? "ON. Stay close to the spoken content and avoid over-rewriting." : "OFF. Write polished clinical prose."}
 
-Neurology Malayalam and Manglish lexicon:
+High-value glossary (spoken phrase -> clinical English):
+തല ചുറ്റൽ -> Vertigo; തലകറക്കം/thala karangunnu -> Dizziness;
+മരവിപ്പ് -> Numbness; കൈയ്ക്ക് ബലം കുറവ് -> Upper limb weakness;
+കാലിന് ബലം കുറവ്/leg weakness undu -> Lower limb weakness;
+കൈകാലുകൾക്ക് ബലം കുറവ് -> Limb weakness;
+വാക്ക് കുഴയൽ/speech clear alla -> Dysarthria or slurring of speech;
+സംസാരിക്കാൻ പറ്റിയില്ല -> Aphasia; ഓർമ്മക്കുറവ്/മറവി/memory kuravaanu -> Memory impairment;
+കാഴ്ച മങ്ങൽ -> Blurring of vision; ഇരട്ട കാഴ്ച -> Diplopia;
+വിഴുങ്ങാൻ ബുദ്ധിമുട്ട് -> Dysphagia; നടക്കാൻ ബുദ്ധിമുട്ട് -> Gait difficulty;
+ബാലൻസ് പോകുന്നു/balance pokunnu -> Imbalance; കൈ വിറയ്ക്കുന്നു -> Tremor;
+ശരീരം മുറുകുന്നു/body stiff aakunnu -> Stiffness;
+മുഖം കോടി പോകുക/മുഖം വലിഞ്ഞു/വായ കോണൽ -> Facial deviation or facial droop;
+ഒരു വശം തളർന്നു -> Hemiparesis; ഒരു വശം മരവിച്ചു -> Hemisensory symptoms;
+പെട്ടെന്ന് വീണു -> Sudden collapse; ബോധം പോയി -> Loss of consciousness or awareness;
+ബോധം കുറഞ്ഞു -> Altered sensorium; ഫിറ്റ്സ്/fit vannu -> Seizure;
+കൈകാലുകൾ വെട്ടി -> Generalized tonic-clonic seizure;
+കണ്ണ് മുകളിലേക്ക് പോയി -> Upward eye deviation; വായിൽ നുര വന്നു -> Frothing;
+നാക്ക് കടിച്ചു -> Tongue bite; മൂത്രം പോയി -> Urinary incontinence;
+ഞെട്ടൽ പോലെ -> Jerking movements; നടക്കാൻ മന്ദം -> Bradykinesia;
+ചെറിയ ചുവടുകൾ -> Shuffling gait; തലയുടെ ഒരു വശത്ത് വേദന -> Unilateral headache;
+വെളിച്ചം സഹിക്കാൻ പറ്റുന്നില്ല -> Photophobia; ശബ്ദം സഹിക്കാൻ പറ്റുന്നില്ല -> Phonophobia;
+ഛർദ്ദി വരുന്നു -> Nausea; ഛർദ്ദി ഉണ്ട് -> Vomiting;
+കൂടിക്കൊണ്ടിരിക്കുകയാണ് -> Progressive symptoms; കുറവുണ്ട് -> Improvement noted;
+മാറ്റമില്ല -> No significant change; പ്രമേഹം -> Diabetes mellitus;
+പ്രഷർ -> Hypertension; കൊളസ്ട്രോൾ -> Dyslipidemia;
+തൈറോയ്ഡ് -> Thyroid disorder; ബ്രെയിൻ ബ്ലോക്ക് -> Cerebral infarction;
+രക്തസ്രാവം -> Intracranial hemorrhage.
 
-Symptoms:
-തല ചുറ്റൽ = Vertigo
-തലകറക്കം = Dizziness
-മരവിപ്പ് = Numbness
-ഉറക്കം പിടിക്കുന്നു = Excessive daytime sleepiness
-കൈയ്ക്ക് ബലം കുറവ് = Upper limb weakness
-കാലിന് ബലം കുറവ് = Lower limb weakness
-കൈകാലുകൾക്ക് ബലം കുറവ് = Limb weakness
-സംസാരിക്കാൻ ബുദ്ധിമുട്ട് = Speech difficulty
-വാക്ക് കുഴയൽ = Slurring of speech
-ഓർമ്മക്കുറവ് / മറവി = Memory impairment
-കാഴ്ച മങ്ങൽ = Blurring of vision
-ഇരട്ട കാഴ്ച = Diplopia
-വിഴുങ്ങാൻ ബുദ്ധിമുട്ട് = Dysphagia
-നടക്കാൻ ബുദ്ധിമുട്ട് = Gait difficulty
-ബാലൻസ് പോകുന്നു = Imbalance
-കൈ വിറയ്ക്കുന്നു = Tremor
-ശരീരം മുറുകുന്നു = Stiffness
-ക്ഷീണം = Fatigue
-തലവേദന = Headache
-മൈഗ്രെയ്ൻ = Migraine
-മുഖം കോടി പോകുക / മുഖം വലിഞ്ഞു = Facial deviation or facial asymmetry
-
-Stroke vocabulary:
-കൈ പൊങ്ങി വരില്ല = Unable to lift arm
-കാല് പൊങ്ങി വരില്ല = Unable to lift leg
-ഒരു വശം തളർന്നു = Hemiparesis
-ഒരു വശം മരവിച്ചു = Hemisensory symptoms
-സംസാരിക്കാൻ പറ്റിയില്ല = Aphasia
-പെട്ടെന്ന് വീണു = Sudden collapse
-വായ കോണൽ = Facial droop
-ബോധം പോയി = Loss of consciousness
-ബോധം കുറഞ്ഞു = Altered sensorium
-
-Seizure vocabulary:
-അപസ്മാരം = Epilepsy
-ഫിറ്റ്സ് = Seizure
-കൈകാലുകൾ വെട്ടി = Generalized tonic-clonic seizure
-കണ്ണ് മുകളിലേക്ക് പോയി = Upward eye deviation
-വായിൽ നുര വന്നു = Frothing
-നാക്ക് കടിച്ചു = Tongue bite
-മൂത്രം പോയി = Urinary incontinence
-ബോധം പോയി = Loss of awareness
-ഞെട്ടൽ പോലെ = Jerking movements
-
-Parkinsonism vocabulary:
-നടക്കാൻ മന്ദം = Bradykinesia
-കൈ വിറയ്ക്കുന്നു = Rest tremor when described in the Parkinsonian context
-ശരീരം മുറുകുന്നു = Rigidity when described in the Parkinsonian context
-മുന്നോട്ട് വീഴുന്നു = Forward falls
-പിന്നോട്ട് വീഴുന്നു = Backward falls
-ചെറിയ ചുവടുകൾ = Shuffling gait
-മുഖം എക്സ്പ്രഷൻ ഇല്ല = Masked facies
-
-Headache vocabulary:
-തലയുടെ ഒരു വശത്ത് വേദന = Unilateral headache
-വെളിച്ചം സഹിക്കാൻ പറ്റുന്നില്ല = Photophobia
-ശബ്ദം സഹിക്കാൻ പറ്റുന്നില്ല = Phonophobia
-ഛർദ്ദി വരുന്നു = Nausea
-ഛർദ്ദി ഉണ്ട് = Vomiting
-കണ്ണിന് പിന്നിൽ വേദന = Retro-orbital pain
-
-History phrases:
-എത്ര നാളായി? = Duration of symptoms
-പെട്ടെന്ന് തുടങ്ങിയതാണോ? = Sudden onset
-പതുക്കെ തുടങ്ങിയതാണോ? = Gradual onset
-കൂടിക്കൊണ്ടിരിക്കുകയാണ് = Progressive symptoms
-കുറവുണ്ട് = Improvement noted
-മാറ്റമില്ല = No significant change
-രാത്രിയിൽ കൂടുതലാണ് = Worse at night
-രാവിലെ കൂടുതലാണ് = Worse in the morning
-
-Common Manglish:
-balance pokunnu = Imbalance
-memory kuravaanu = Memory impairment
-speech clear alla = Dysarthria
-hand numb aanu = Hand numbness
-leg weakness undu = Lower limb weakness
-fit vannu = Seizure occurred
-thala karangunnu = Dizziness
-body stiff aakunnu = Generalized stiffness
-
-Medical conditions:
-പ്രമേഹം = Diabetes mellitus
-പ്രഷർ = Hypertension
-കൊളസ്ട്രോൾ = Dyslipidemia
-തൈറോയ്ഡ് = Thyroid disorder
-ഹൃദ്രോഗം = Heart disease
-സ്ട്രോക്ക് = Stroke
-ബ്രെയിൻ ബ്ലോക്ക് = Cerebral infarction
-രക്തസ്രാവം = Intracranial hemorrhage
-
-Return exactly these keys:
-{
-  "presentingComplaint": "",
-  "historyOfPresentIllness": "",
-  "pastMedicalHistory": "",
-  "allergies": "",
-  "familyHistory": "",
-  "personalHistory": "",
-  "generalExamination": "",
-  "systemicExamination": "",
-  "provisionalDiagnosis": "",
-  "treatmentPlan": ""
-}
+Return exactly this JSON object:
+{"presentingComplaint":"","historyOfPresentIllness":"","pastMedicalHistory":"",
+"allergies":"","familyHistory":"","personalHistory":"","examinationFindings":"",
+"currentMedication":"","provisionalDiagnosis":"","treatmentPlan":""}
 `;
     }
 
@@ -1699,7 +1633,10 @@ Return exactly these keys:
               ]
             }],
             generationConfig: {
-              temperature: 0.2,
+              temperature: 0,
+              thinkingConfig: {
+                thinkingBudget: 1024
+              },
               responseMimeType: "application/json"
             }
           })
@@ -1756,10 +1693,10 @@ Return exactly these keys:
       document.getElementById("allergies").value = data.allergies || "NIL";
       document.getElementById("familyHistory").value = data.familyHistory || "NIL";
       document.getElementById("personalHistory").value = data.personalHistory || "NIL";
-      document.getElementById("generalExamination").value = data.generalExamination || "NIL";
-      document.getElementById("systemicExamination").value = data.systemicExamination || "NIL";
-      document.getElementById("provisionalDiagnosis").value = data.provisionalDiagnosis || "Generated provisional diagnosis will appear here.";
-      document.getElementById("treatmentPlan").value = data.treatmentPlan || "Generated treatment plan will appear here.";
+      document.getElementById("examinationFindings").value = data.examinationFindings || "NIL";
+      document.getElementById("currentMedication").value = data.currentMedication || "NIL";
+      document.getElementById("provisionalDiagnosis").value = data.provisionalDiagnosis || "NIL";
+      document.getElementById("treatmentPlan").value = data.treatmentPlan || "NIL";
     }
 
     function resetScribe() {
@@ -1851,8 +1788,8 @@ Return exactly these keys:
       ["4. Allergies", "allergies"],
       ["5. Family History", "familyHistory"],
       ["6. Personal History", "personalHistory"],
-      ["7. General Examination", "generalExamination"],
-      ["8. Systemic Examination", "systemicExamination"],
+      ["7. Examination Findings", "examinationFindings"],
+      ["8. Current Medication", "currentMedication"],
       ["9. Provisional Diagnosis", "provisionalDiagnosis"],
       ["10. Treatment Plan", "treatmentPlan"]
     ];
@@ -1911,7 +1848,11 @@ Return exactly these keys:
     const savedKey = localStorage.getItem("doctor_woyz_api_key") || "";
     keyInput.value = savedKey;
     keyStatus.textContent = savedKey ? "An API key is saved in this browser." : "No API key is saved.";
-    document.getElementById("aiModel").value = localStorage.getItem("opd_demo_ai_model_v2") || window.OPD_SCRIBE_CONFIG.model;
+    const savedModel = localStorage.getItem("opd_demo_ai_model_v2");
+    const availableModels = new Set(["gemini-2.5-pro", "gemini-2.5-flash"]);
+    document.getElementById("aiModel").value = availableModels.has(savedModel)
+      ? savedModel
+      : window.OPD_SCRIBE_CONFIG.model;
     document.querySelectorAll(".section textarea").forEach(textarea => {
       textarea.addEventListener("input", () => resizeTextarea(textarea));
     });
