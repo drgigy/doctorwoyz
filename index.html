@@ -1514,32 +1514,34 @@
       status.textContent = `Recording extended. ${formatTime(remainingTime())} remaining.`;
     }
 
-    function togglePause() {
-      if (!state.mediaRecorder) return;
+    function updatePauseButton(paused) {
       const pauseButton = document.getElementById("pauseButton");
-      if (state.paused) {
+      const label = paused ? "Resume" : "Pause";
+      const title = paused ? "Resume Recording" : "Pause Recording";
+      pauseButton.innerHTML = `${icon(paused ? "play" : "pause")}<span class="mobile-button-text" id="pauseButtonText">${label}</span>`;
+      pauseButton.title = title;
+      pauseButton.setAttribute("aria-label", title);
+      document.getElementById("pauseLabel").textContent = label;
+    }
+
+    function togglePause() {
+      if (!state.mediaRecorder || state.mediaRecorder.state === "inactive") return;
+      if (state.mediaRecorder.state === "paused") {
         state.mediaRecorder.resume();
+        state.paused = false;
         state.startedAt = Date.now() - state.elapsed * 1000;
+        clearInterval(state.timerId);
         state.timerId = setInterval(updateTimer, 1000);
         status.textContent = "Recording in progress...";
-        pauseButton.innerHTML = icon("pause");
-        pauseButton.title = "Pause Recording";
-        pauseButton.setAttribute("aria-label", "Pause Recording");
-        document.getElementById("pauseLabel").textContent = "Pause";
-        document.getElementById("pauseButtonText").textContent = "Pause";
-        state.paused = false;
+        updatePauseButton(false);
         focusBox.classList.add("recording");
-      } else {
+      } else if (state.mediaRecorder.state === "recording") {
         state.mediaRecorder.pause();
+        state.paused = true;
         clearInterval(state.timerId);
         cancelAnimationFrame(state.animationId);
         status.textContent = "Recording paused";
-        pauseButton.innerHTML = icon("play");
-        pauseButton.title = "Resume Recording";
-        pauseButton.setAttribute("aria-label", "Resume Recording");
-        document.getElementById("pauseLabel").textContent = "Resume";
-        document.getElementById("pauseButtonText").textContent = "Resume";
-        state.paused = true;
+        updatePauseButton(true);
         focusBox.classList.remove("recording");
       }
     }
