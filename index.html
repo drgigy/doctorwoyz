@@ -392,6 +392,10 @@
       white-space: nowrap;
     }
 
+    .mobile-button-text {
+      display: none;
+    }
+
     .round {
       width: 64px;
       height: 64px;
@@ -927,28 +931,83 @@
         padding: 18px;
       }
 
-      .round {
-        width: 56px;
-        height: 56px;
-      }
-
-      .round.record {
-        width: 70px;
-        height: 70px;
+      .strict-row {
+        display: none;
       }
 
       .controls {
-        gap: 10px;
-        min-height: 68px;
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        min-height: 0;
+      }
+
+      .control-item {
+        width: 100%;
+        gap: 0;
       }
 
       .control-label {
-        display: block;
+        display: none;
+      }
+
+      .mobile-button-text {
+        display: inline;
+        font-size: 16px;
+        font-weight: 800;
+      }
+
+      .round {
+        width: 100%;
+        height: 76px;
+        min-width: 0;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 10px 12px;
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.16);
+      }
+
+      .round.record {
+        width: 100%;
+        height: 112px;
+        border-radius: 14px;
+      }
+
+      .start-control,
+      .pause-control,
+      .extend-control {
+        grid-column: 1 / -1;
+      }
+
+      .stop-control {
+        grid-column: 1;
+        grid-row: 1;
+      }
+
+      .refresh-control {
+        grid-column: 2;
+        grid-row: 1;
+      }
+
+      .pause-control {
+        grid-row: 2;
+      }
+
+      .extend-control {
+        grid-row: 3;
       }
 
       .extend-button {
-        min-height: 46px;
-        padding-inline: 11px;
+        width: 100%;
+        height: 76px;
+        min-height: 76px;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-size: 16px;
       }
 
       .timer {
@@ -1016,9 +1075,6 @@
       .new-button { font-size: 0; padding: 10px; }
       .new-button svg { width: 19px; height: 19px; }
       .card { padding: 16px 12px; }
-      .round { width: 52px; height: 52px; }
-      .control-item.extend-control { order: 4; width: min(100%, 180px); }
-      .extend-button { width: 100%; }
       .section textarea { font-size: 16px; }
     }
   </style>
@@ -1073,9 +1129,10 @@
             </div>
           </div>
           <div class="controls" id="controls">
-            <span class="control-item">
+            <span class="control-item start-control">
               <button class="round record" id="recordButton" type="button" title="Start Recording" aria-label="Start Recording">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>
+                <span class="mobile-button-text">Start recording</span>
               </button>
               <span class="control-label">Start recording</span>
             </span>
@@ -1116,6 +1173,22 @@
           </div>
         </div>
         <div class="result-grid">
+          <div class="section patient-detail">
+            <h3>Name</h3>
+            <textarea id="patientName">NIL</textarea>
+          </div>
+          <div class="section patient-detail">
+            <h3>Age</h3>
+            <textarea id="patientAge">NIL</textarea>
+          </div>
+          <div class="section patient-detail">
+            <h3>Sex</h3>
+            <textarea id="patientSex">NIL</textarea>
+          </div>
+          <div class="section patient-detail">
+            <h3>UHID</h3>
+            <textarea id="patientUhid">NIL</textarea>
+          </div>
           <div class="section full">
             <h3>1. Presenting Complaint</h3>
             <textarea id="presentingComplaint">Connect your API to generate this section from the recorded audio.</textarea>
@@ -1357,19 +1430,19 @@
 
     function setRecordingControls() {
       controls.innerHTML = `
-        <span class="control-item">
-          <button class="round pause" id="pauseButton" type="button" title="Pause Recording" aria-label="Pause Recording">${icon("pause")}</button>
+        <span class="control-item pause-control">
+          <button class="round pause" id="pauseButton" type="button" title="Pause Recording" aria-label="Pause Recording">${icon("pause")}<span class="mobile-button-text" id="pauseButtonText">Pause</span></button>
           <span class="control-label" id="pauseLabel">Pause</span>
         </span>
-        <span class="control-item">
-          <button class="round stop" id="stopButton" type="button" title="Stop and Transcribe" aria-label="Stop and Transcribe">${icon("stop")}</button>
+        <span class="control-item stop-control">
+          <button class="round stop" id="stopButton" type="button" title="Stop and Transcribe" aria-label="Stop and Transcribe">${icon("stop")}<span class="mobile-button-text">Stop &amp; transcribe</span></button>
           <span class="control-label">Stop &amp; transcribe</span>
         </span>
         <span class="control-item extend-control">
           <button class="extend-button" id="extendButton" type="button">Extend 5 min</button>
         </span>
-        <span class="control-item">
-          <button class="round discard" id="discardButton" type="button" title="Refresh and Restart" aria-label="Refresh and Restart">${icon("restart")}</button>
+        <span class="control-item refresh-control">
+          <button class="round discard" id="discardButton" type="button" title="Refresh and Restart" aria-label="Refresh and Restart">${icon("restart")}<span class="mobile-button-text">Refresh</span></button>
           <span class="control-label">Refresh</span>
         </span>
       `;
@@ -1381,8 +1454,8 @@
 
     function setIdleControls() {
       controls.innerHTML = `
-        <span class="control-item">
-          <button class="round record" id="recordButton" type="button" title="Start Recording" aria-label="Start Recording">${icon("mic")}</button>
+        <span class="control-item start-control">
+          <button class="round record" id="recordButton" type="button" title="Start Recording" aria-label="Start Recording">${icon("mic")}<span class="mobile-button-text">Start recording</span></button>
           <span class="control-label">Start recording</span>
         </span>
       `;
@@ -1453,6 +1526,7 @@
         pauseButton.title = "Pause Recording";
         pauseButton.setAttribute("aria-label", "Pause Recording");
         document.getElementById("pauseLabel").textContent = "Pause";
+        document.getElementById("pauseButtonText").textContent = "Pause";
         state.paused = false;
         focusBox.classList.add("recording");
       } else {
@@ -1464,6 +1538,7 @@
         pauseButton.title = "Resume Recording";
         pauseButton.setAttribute("aria-label", "Resume Recording");
         document.getElementById("pauseLabel").textContent = "Resume";
+        document.getElementById("pauseButtonText").textContent = "Resume";
         state.paused = true;
         focusBox.classList.remove("recording");
       }
@@ -1559,6 +1634,11 @@ Rules:
   examination findings, and the doctor's final assessment.
 - Never invent, assume, or complete missing facts. Do not infer a diagnosis,
   medicine, examination finding, or negative finding from context.
+- Fill "patientName", "patientAge", "patientSex", and "patientUhid" only when
+  each item is explicitly dictated. Never guess identity details from names,
+  voices, pronouns, context, or other sections. Return "NIL" for every
+  patient-detail item that was not dictated. Preserve the dictated name and
+  UHID exactly; preserve the stated age unit such as years, months, or days.
 - Fill "provisionalDiagnosis" only when the doctor explicitly dictates a
   provisional diagnosis. Never derive it from symptoms, history, examination,
   investigations, differential discussion, or the patient's statements.
@@ -1602,7 +1682,8 @@ High-value glossary (spoken phrase -> clinical English):
 രക്തസ്രാവം -> Intracranial hemorrhage.
 
 Return exactly this JSON object:
-{"presentingComplaint":"","historyOfPresentIllness":"","pastMedicalHistory":"",
+{"patientName":"","patientAge":"","patientSex":"","patientUhid":"",
+"presentingComplaint":"","historyOfPresentIllness":"","pastMedicalHistory":"",
 "allergies":"","familyHistory":"","personalHistory":"","examinationFindings":"",
 "currentMedication":"","provisionalDiagnosis":"","treatmentPlan":""}
 `;
@@ -1687,6 +1768,10 @@ Return exactly this JSON object:
     }
 
     function fillReport(data) {
+      document.getElementById("patientName").value = data.patientName || "NIL";
+      document.getElementById("patientAge").value = data.patientAge || "NIL";
+      document.getElementById("patientSex").value = data.patientSex || "NIL";
+      document.getElementById("patientUhid").value = data.patientUhid || "NIL";
       document.getElementById("presentingComplaint").value = data.presentingComplaint || "Generated presenting complaint will appear here.";
       document.getElementById("historyOfPresentIllness").value = data.historyOfPresentIllness || "Generated history of present illness will appear here.";
       document.getElementById("pastMedicalHistory").value = data.pastMedicalHistory || "NIL";
@@ -1782,6 +1867,10 @@ Return exactly this JSON object:
     });
 
     const caseFields = [
+      ["Name", "patientName"],
+      ["Age", "patientAge"],
+      ["Sex", "patientSex"],
+      ["UHID", "patientUhid"],
       ["1. Presenting Complaint", "presentingComplaint"],
       ["2. History of Present Illness", "historyOfPresentIllness"],
       ["3. Past Medical History", "pastMedicalHistory"],
