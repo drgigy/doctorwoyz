@@ -1084,7 +1084,7 @@
     <div class="approval-card">
       <div class="approval-brand"><span class="brand-mark">W</span><span>Doctor WOYZ</span></div>
       <h1>Device approval required</h1>
-      <p id="approvalStatusText">Register this browser. The administrator can then approve it from the central admin page.</p>
+      <p id="approvalStatusText" hidden></p>
       <div class="approval-field">
         <label for="doctorName">Doctor's name</label>
         <input id="doctorName" type="text" autocomplete="name" placeholder="Dr. Name">
@@ -1342,7 +1342,8 @@
       const registerButton = document.getElementById("registerDeviceButton");
       if (!data) {
         showApprovalGate();
-        statusText.textContent = "Register this browser. The administrator can then approve it from the central admin page.";
+        statusText.textContent = "";
+        statusText.hidden = true;
         message.textContent = "";
         registerButton.disabled = false;
         return;
@@ -1355,12 +1356,14 @@
       }
       if (data.status === "blocked") {
         showApprovalGate();
+        statusText.hidden = false;
         statusText.textContent = "This device has been blocked by the administrator.";
         message.textContent = "Contact the administrator if access should be restored.";
         registerButton.disabled = true;
         return;
       }
       showApprovalGate();
+      statusText.hidden = false;
       statusText.textContent = "Approval request submitted. Keep this page open or return later after the administrator approves it.";
       message.textContent = "Status: Pending approval";
       registerButton.disabled = true;
