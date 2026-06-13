@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#ffffff">
-  <meta name="description" content="Neurology OPD voice scribe for structured, editable clinical case sheets.">
+  <meta name="description" content="Neurology OPD voice scribe for structured, editable visit notes.">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1116,7 +1116,7 @@
 
     <main>
       <section class="center" id="recordView">
-        <p class="intro">Record the doctor-patient conversation and convert it into a structured OPD case sheet.</p>
+        <p class="intro">Record the doctor-patient conversation and convert it into a structured OPD visit note.</p>
         <div class="card" id="recordCard">
           <div class="focus-box" id="focusBox">
             <div class="focus-inner">
@@ -1152,7 +1152,7 @@
 
       <section class="processing card" id="processingView">
         <h2 style="margin:0 0 6px;">AI Scribe Working</h2>
-        <p id="processingText" style="margin:0; color:var(--muted);">Preparing your OPD case sheet...</p>
+        <p id="processingText" style="margin:0; color:var(--muted);">Preparing your visit note...</p>
         <div class="progress"><span></span></div>
       </section>
 
@@ -1163,7 +1163,7 @@
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M8 13h8"></path><path d="M8 17h8"></path></svg>
             </span>
             <div>
-              <h2>Generated Case Sheet</h2>
+              <h2>Visit Note</h2>
               <p class="result-message" id="resultMessage"></p>
             </div>
           </div>
@@ -1632,6 +1632,11 @@ Kerala Manglish conversation into concise professional clinical English.
 
 Rules:
 - Output valid JSON only. No markdown.
+- Every output value must be written only in English using Latin letters,
+  numbers, and standard punctuation. Do not output Malayalam script or retain
+  Malayalam words in any field. Translate all clinical content into English.
+- Transliterate dictated patient names into English Latin letters. Never write
+  a patient name in Malayalam script.
 - Preserve chronology, onset, duration, progression, relevant negatives,
   medicines with dose/frequency/duration, investigations, examination,
   diagnoses, and treatment advice exactly as expressed.
@@ -1642,8 +1647,8 @@ Rules:
 - Fill "patientName", "patientAge", "patientSex", and "patientUhid" only when
   each item is explicitly dictated. Never guess identity details from names,
   voices, pronouns, context, or other sections. Return "NIL" for every
-  patient-detail item that was not dictated. Preserve the dictated name and
-  UHID exactly; preserve the stated age unit such as years, months, or days.
+  patient-detail item that was not dictated. Preserve UHID exactly and preserve
+  the stated age unit such as years, months, or days.
 - Fill "provisionalDiagnosis" only when the doctor explicitly dictates a
   provisional diagnosis. Never derive it from symptoms, history, examination,
   investigations, differential discussion, or the patient's statements.
